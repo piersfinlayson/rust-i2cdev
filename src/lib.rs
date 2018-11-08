@@ -24,7 +24,7 @@ extern crate bitflags;
 extern crate nix;
 
 #[cfg(any(target_os = "linux", target_os = "android"))]
-mod ffi;
+pub mod ffi;
 
 pub mod core;
 

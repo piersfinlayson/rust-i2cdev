@@ -23,6 +23,10 @@ pub struct LinuxI2CDevice {
     slave_address: u16,
 }
 
+pub struct LinuxI2CBus {
+    devfile: File,
+}
+
 #[derive(Debug)]
 pub enum LinuxI2CError {
     Nix(nix::Error),
@@ -83,6 +87,12 @@ impl Error for LinuxI2CError {
 }
 
 impl AsRawFd for LinuxI2CDevice {
+    fn as_raw_fd(&self) -> RawFd {
+        self.devfile.as_raw_fd()
+    }
+}
+
+impl AsRawFd for LinuxI2CBus {
     fn as_raw_fd(&self) -> RawFd {
         self.devfile.as_raw_fd()
     }
@@ -219,5 +229,24 @@ impl I2CDevice for LinuxI2CDevice {
     /// 1 to 31 bytes of data from it.
     fn smbus_process_block(&mut self, register: u8, values: &[u8]) -> Result<Vec<u8>, LinuxI2CError> {
         ffi::i2c_smbus_process_call_block(self.as_raw_fd(), register, values).map_err(From::from)
+    }
+}
+
+impl LinuxI2CBus {
+    /// Create a new LinuxI2CBus for the specified path
+    pub fn new<P: AsRef<Path>>(path: P)
+                               -> Result<LinuxI2CBus, LinuxI2CError> {
+        let file = OpenOptions::new()
+                            .read(true)
+                            .write(true)
+                            .open(path)?;
+        let bus = LinuxI2CBus {
+            devfile: file,
+        };
+        Ok(bus)
+    }
+
+    pub fn rdwr(&mut self, msgs: &mut Vec<ffi::i2c_msg>) -> Result<(), LinuxI2CError> {
+        ffi::i2c_rdwr_read_write(self.as_raw_fd(), msgs).map_err(From::from)
     }
 }
