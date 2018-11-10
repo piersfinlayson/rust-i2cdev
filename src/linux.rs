@@ -7,7 +7,7 @@
 // except according to those terms.
 
 use ffi;
-use core::I2CDevice;
+use core::{I2CDevice, I2CBus};
 use std::error::Error;
 use std::path::Path;
 use std::fs::File;
@@ -17,6 +17,9 @@ use std::io;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::os::unix::prelude::*;
+
+// Expose these core structs from this module
+pub use core::{I2CMsgFlags, I2CMsg};
 
 pub struct LinuxI2CDevice {
     devfile: File,
@@ -245,8 +248,19 @@ impl LinuxI2CBus {
         };
         Ok(bus)
     }
+}
 
-    pub fn rdwr(&mut self, msgs: &mut Vec<ffi::i2c_msg>) -> Result<(), LinuxI2CError> {
+impl I2CBus for LinuxI2CBus {
+    type Error = LinuxI2CError;
+
+    /// Issue the provided sequence of I2C transactions
+    fn rdwr(&mut self, msgs: &mut Vec<I2CMsg>) -> Result<(i32), LinuxI2CError> {
+        /*
+        match ffi::i2c_rdwr_read_write(self.as_raw_fd(), msgs) {
+            Ok(rc) => {println!("Rc: {}", rc); Ok(rc)},
+            Err(err) => Err(err).map_err(From::from)
+        }
+        */
         ffi::i2c_rdwr_read_write(self.as_raw_fd(), msgs).map_err(From::from)
     }
 }
