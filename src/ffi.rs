@@ -435,20 +435,20 @@ unsafe fn i2c_rdwr_access(fd: RawFd,
                           msgs: *mut i2c_msg,
                           nmsgs: usize)
                           -> Result<(c_int), I2CError> {
-    let mut args = i2c_rdwr_ioctl_data {
-        msgs: msgs,
+    let args = i2c_rdwr_ioctl_data {
+        msgs,
         nmsgs: nmsgs as u32,
     };
 
-    ioctl::i2c_rdwr(fd, &mut args)
+    ioctl::i2c_rdwr(fd, &args)
 }
 
-pub fn i2c_rdwr_read_write<'a, 'b>(fd: RawFd,
-                                   msgs: &'b mut Vec<I2CMsg<'a>>) -> Result<(i32), I2CError> {
+pub fn i2c_rdwr_read_write(fd: RawFd,
+                           msgs: &mut Vec<I2CMsg>) -> Result<(i32), I2CError> {
     // Building the msgs to push is safe.
     // We have to use iter_mut as buf needs to be mutable.
     let mut cmsgs = msgs.iter_mut().map(|msg|
-        <i2c_msg<'a>>::from(msg)
+        <i2c_msg>::from(msg)
     ).collect::<Vec<_>>();
 
     // But calling the ioctl is definitely not!

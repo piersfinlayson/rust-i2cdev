@@ -129,7 +129,7 @@ pub trait I2CBus {
     // Performs multiple serially chained I2C read/write transactions.  On
     // success the return code is the number of successfully executed
     // transactions
-    fn rdwr<'a>(&mut self, msgs: &'a mut Vec<I2CMsg<'a>>) -> Result<i32, Self::Error>;
+    fn rdwr<'a>(&mut self, msgs: &mut Vec<I2CMsg<'a>>) -> Result<i32, Self::Error>;
 }
 
 bitflags! {
@@ -156,13 +156,58 @@ bitflags! {
 /// Rust version of i2c_msg
 pub struct I2CMsg<'a> {
     /// slave address
-    pub addr: u16,
+    pub(crate) addr: u16,
     /// serialized I2CMsgFlags
-    pub flags: u16,
+    pub(crate) flags: u16,
 
     /// msg length comes from msg Vector length
 
     /// msg data to be sent/received
-    pub data: &'a mut Vec<u8>,
+    pub(crate) data: &'a mut Vec<u8>,
 }
 
+impl<'a> I2CMsg<'a> {
+    /// Create I2CMsg from address and data buffer
+    pub fn new(addr: u16, data: &'a mut Vec<u8>) -> Self {
+        I2CMsg {
+            addr,
+            flags: 0,
+            data
+        }
+    }
+
+    /// Set flags
+    pub fn set_flags(&mut self, flags: u16) {
+        self.flags = flags;
+    }
+
+    /// Get flags
+    pub fn flags(&mut self) -> u16 {
+        self.flags
+    }
+
+    /// Set addr
+    pub fn set_addr(&mut self, addr: u16) {
+        self.addr = addr;
+    }
+
+    /// Get addr
+    pub fn addr(&mut self) -> u16 {
+        self.addr
+    }
+
+    /// Set data
+    pub fn set_data(&mut self, data: &'a mut Vec<u8>) {
+        self.data = data;
+    }
+
+    /// Get addr
+    pub fn data(&mut self) -> Vec<u8> {
+        self.data.clone()
+    }
+
+    /// Sets the read flag
+    pub fn set_read(&mut self) {
+        self.flags |= I2CMsgFlags::I2C_M_RD.bits;
+    }
+}

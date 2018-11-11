@@ -255,12 +255,6 @@ impl I2CBus for LinuxI2CBus {
 
     /// Issue the provided sequence of I2C transactions
     fn rdwr(&mut self, msgs: &mut Vec<I2CMsg>) -> Result<(i32), LinuxI2CError> {
-        /*
-        match ffi::i2c_rdwr_read_write(self.as_raw_fd(), msgs) {
-            Ok(rc) => {println!("Rc: {}", rc); Ok(rc)},
-            Err(err) => Err(err).map_err(From::from)
-        }
-        */
         ffi::i2c_rdwr_read_write(self.as_raw_fd(), msgs).map_err(From::from)
     }
 }
