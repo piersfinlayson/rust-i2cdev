@@ -254,7 +254,7 @@ impl I2CBus for LinuxI2CBus {
     type Error = LinuxI2CError;
 
     /// Issue the provided sequence of I2C transactions
-    fn rdwr(&mut self, msgs: &mut Vec<I2CMsg>) -> Result<(i32), LinuxI2CError> {
+    fn rdwr(&mut self, msgs: &mut Vec<I2CMsg>) -> Result<i32, LinuxI2CError> {
         ffi::i2c_rdwr_read_write(self.as_raw_fd(), msgs).map_err(From::from)
     }
 }

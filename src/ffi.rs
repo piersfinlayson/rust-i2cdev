@@ -447,9 +447,7 @@ pub fn i2c_rdwr_read_write(fd: RawFd,
                            msgs: &mut Vec<I2CMsg>) -> Result<(i32), I2CError> {
     // Building the msgs to push is safe.
     // We have to use iter_mut as buf needs to be mutable.
-    let mut cmsgs = msgs.iter_mut().map(|msg|
-        <i2c_msg>::from(msg)
-    ).collect::<Vec<_>>();
+    let mut cmsgs = msgs.iter_mut().map(<i2c_msg>::from).collect::<Vec<_>>();
 
     // But calling the ioctl is definitely not!
     unsafe {
