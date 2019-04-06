@@ -13,7 +13,7 @@
 //! kernel interface for interacting with i2c in userspace:
 //! https://www.kernel.org/doc/Documentation/i2c/dev-interface
 
-#![crate_name = "i2cdev"]
+#![crate_name = "i2cdev2"]
 #![crate_type = "lib"]
 
 extern crate libc;
